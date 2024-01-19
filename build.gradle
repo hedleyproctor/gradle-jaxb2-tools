@@ -1,0 +1,53 @@
+plugins {
+    id 'java'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    jaxb
+}
+
+ext {
+    jaxb2_basics_version = "0.10.0"
+}
+
+dependencies {
+
+    jaxb("javax.xml.bind:jaxb-api:2.3.0")
+    jaxb 'com.sun.xml.bind:jaxb-impl:2.3.2'
+    jaxb 'com.sun.xml.bind:jaxb-xjc:2.3.2'
+
+    jaxb 'com.sun.istack:istack-commons-runtime:3.0.10'
+    jaxb "javax.activation:activation:1.1"
+
+    jaxb "org.jvnet.jaxb2_commons:jaxb2-basics:$jaxb2_basics_version"
+    jaxb "org.jvnet.jaxb2_commons:jaxb2-basics-runtime:$jaxb2_basics_version"
+    jaxb "org.jvnet.jaxb2_commons:jaxb2-basics-ant:$jaxb2_basics_version"
+    jaxb "org.jvnet.jaxb2_commons:jaxb2-basics-tools:$jaxb2_basics_version"
+    jaxb 'org.slf4j:slf4j-simple:1.7.25'
+
+}
+
+task jaxb(){
+    description 'Converts xsds to classes'
+    def jaxbTargetDir = file("$buildDir/generated/jaxb")
+    doLast {
+        jaxbTargetDir.mkdirs()
+        ant.taskdef(name: 'xjc',
+                classname: 'org.jvnet.jaxb2_commons.xjc.XJC2Task',
+                classpath: configurations.jaxb.asPath)
+        ant.jaxbTargetDir = jaxbTargetDir
+        ant.xjc(destdir: "${jaxbTargetDir}",
+                package: 'com.sample.jaxbclasses',
+                schema:'xsd/noteexport-simple.xsd',
+                extension:'true'){
+            arg(line: '-verbose')
+        }
+    }
+}
